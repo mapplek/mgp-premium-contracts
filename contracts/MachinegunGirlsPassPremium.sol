@@ -44,14 +44,14 @@ contract MachinegunGirlsPassPremium is
 
     // Mint Parameters
     uint64 public maxSupply = 48;
-    uint64 public balanceRatioForDevWallet = 0;  // 0-100
+    uint64 public balanceRatioForDevWallet = 30;  // 0-100
     uint64 public costForMint = 30000000000000000;
     uint64 public costForChangePassName = 10000000000000000;
     mapping(address => TokenData) public _tokenData;
     mapping(uint256 => string) public userPassName;
 
     // Addresses
-    address payable public withdrawAddress = payable(0x7d8F441BF65FF8cdA99059FB5137AF720DE562fB);
+    address payable public withdrawAddress = payable(0x1a2f4bB65b98A294ce342b64e99667cd149b7caf);
     address payable public developerAddress = payable(0xF2b12AAa4410928eB8C1a61C0a7BB0447b930303);
 
     PassRenderer public renderer;

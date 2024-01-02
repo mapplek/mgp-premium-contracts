@@ -6,8 +6,8 @@ module.exports = {
   solidity: "0.8.19",
 
   networks: {
-    goerli: {
-      url: "https://goerli.infura.io/v3/" + process.env.INFURA_KEY,
+    mainnet: {
+      url: "https://mainnet.infura.io/v3/" + process.env.INFURA_KEY,
       accounts: [`${process.env.PRIVATE_KEY}`],
     },
     hardhat: {
