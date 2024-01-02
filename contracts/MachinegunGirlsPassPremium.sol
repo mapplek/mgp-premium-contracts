@@ -24,6 +24,7 @@ contract MachinegunGirlsPassPremium is
     // Error functions
     error CallerIsNotUser(address);
     error InsufficientBalance(uint256);
+    error InvalidRatio(uint64);
     error NotMinted();
     error NotTokenOwner(uint256, address);
     error OverNameLength(string);
@@ -42,14 +43,16 @@ contract MachinegunGirlsPassPremium is
     bytes32 public constant ADMIN  = keccak256('ADMIN');
 
     // Mint Parameters
-    uint128 public maxSupply = 48;
+    uint64 public maxSupply = 48;
+    uint64 public balanceRatioForDevWallet = 0;  // 0-100
     uint64 public costForMint = 30000000000000000;
     uint64 public costForChangePassName = 10000000000000000;
     mapping(address => TokenData) public _tokenData;
     mapping(uint256 => string) public userPassName;
 
     // Addresses
-    address payable public withdrawAddress = payable(0xF2b12AAa4410928eB8C1a61C0a7BB0447b930303);
+    address payable public withdrawAddress = payable(0x7d8F441BF65FF8cdA99059FB5137AF720DE562fB);
+    address payable public developerAddress = payable(0xF2b12AAa4410928eB8C1a61C0a7BB0447b930303);
 
     PassRenderer public renderer;
 
@@ -79,11 +82,18 @@ contract MachinegunGirlsPassPremium is
         costForChangePassName = _cost;
     }
 
-    function setMaxSupply(uint128 _supply)
+    function setMaxSupply(uint64 _supply)
         external
         onlyRole(ADMIN)
     {
         maxSupply = _supply;
+    }
+
+    function setDeveloperAddress(address payable value)
+        public
+        onlyRole(ADMIN)
+    {
+        developerAddress = value;
     }
 
     function setWithdrawAddress(address payable value)
@@ -91,6 +101,17 @@ contract MachinegunGirlsPassPremium is
         onlyRole(ADMIN)
     {
         withdrawAddress = value;
+    }
+
+    function setBalanceRatioForDevWallet(uint64 _ratio)
+        public
+        onlyRole(ADMIN)
+    {
+        if (_ratio < 0 || 100 < _ratio) {
+            revert InvalidRatio(_ratio);
+        }
+
+        balanceRatioForDevWallet = _ratio;
     }
 
     function setRenderer(PassRenderer _renderer)
@@ -246,6 +267,11 @@ contract MachinegunGirlsPassPremium is
         payable
         onlyRole(ADMIN)
     {
+        // withdrawing for dev wallet according to balance ratio
+        (bool dev, ) = payable(developerAddress).call{value: address(this).balance * balanceRatioForDevWallet / 100}('');
+        require(dev);
+
+        // withdrawing for dao wallet remainder
         (bool os, ) = payable(withdrawAddress).call{value: address(this).balance}('');
         require(os);
     }
